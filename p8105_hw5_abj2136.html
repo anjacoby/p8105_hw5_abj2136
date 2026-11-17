@@ -357,9 +357,12 @@ display: none;
 
 <div id="problem-2" class="section level1">
 <h1>Problem 2</h1>
-<p>loading libraries</p>
+<div id="loading-libraries" class="section level3">
+<h3>loading libraries</h3>
 <pre class="r"><code>library(tidyverse)</code></pre>
-<p>creating data frame</p>
+</div>
+<div id="creating-data-frame" class="section level3">
+<h3>creating data frame</h3>
 <pre class="r"><code>study_df =
   tibble(
     files = list.files(&quot;data&quot;),
@@ -381,7 +384,9 @@ display: none;
   ) |&gt; 
   mutate(week = as.numeric(week)) |&gt; 
   select(arm, subject_id, week, observation)</code></pre>
-<p>spaghetti plot</p>
+</div>
+<div id="spaghetti-plot" class="section level3">
+<h3>spaghetti plot</h3>
 <pre class="r"><code>study_df |&gt; 
   ggplot(aes(x = week, y = observation, group = subject_id, color = arm)) +
   geom_point() +
@@ -398,6 +403,47 @@ display: none;
 group have have relatively stable observation values over time, while
 the observed outcome measure in the experimental group increases
 approximately linearly over time from week 1 to week 8.</p>
+</div>
+</div>
+<div id="problem-3" class="section level1">
+<h1>Problem 3</h1>
+<pre class="r"><code># simulation
+
+sim_t_test = function(n = 30, mu, sigma = 5) {
+  sim_data = tibble(
+    x = rnorm(n, mean = mu, sd = sigma)
+  )
+  
+  sim_data |&gt; 
+    pull(x) |&gt; 
+    t.test(mu = 0) |&gt; 
+    broom::tidy() |&gt; 
+    select(estimate, p.value)
+}
+
+# loop for mu = 1,2,3,4,5,6
+
+set.seed(1)
+
+mu_values = 0:6
+output = vector(&quot;list&quot;, 7)
+
+for (i in 1:7) {
+  
+  sims = vector(&quot;list&quot;, 5000)
+  
+  for (j in 1:5000) {
+    
+    sims[[j]] = sim_t_test(mu = mu_values[i])
+    
+  }
+  
+  output[[i]] = bind_rows(sims) |&gt; 
+  mutate(mu = mu_values[i])
+  
+}
+
+sim_results = bind_rows(output)</code></pre>
 </div>
 
 

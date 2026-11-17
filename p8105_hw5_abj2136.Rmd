@@ -6,14 +6,14 @@ date: "2026-11-16"
 
 # Problem 2
 
-loading libraries
+### loading libraries
 ```{r message = FALSE}
 library(tidyverse)
 ```
 
 
 
-creating data frame
+### creating data frame
 
 ```{r message = FALSE}
 
@@ -41,7 +41,7 @@ study_df =
 
 ```
 
-spaghetti plot
+### spaghetti plot
 
 ```{r}
 
@@ -64,6 +64,50 @@ have relatively stable observation values over time, while the observed
 outcome measure in the experimental group increases approximately linearly
 over time from week 1 to week 8. 
 
+# Problem 3
+
+
+
+```{r}
+
+# simulation
+
+sim_t_test = function(n = 30, mu, sigma = 5) {
+  sim_data = tibble(
+    x = rnorm(n, mean = mu, sd = sigma)
+  )
+  
+  sim_data |> 
+    pull(x) |> 
+    t.test(mu = 0) |> 
+    broom::tidy() |> 
+    select(estimate, p.value)
+}
+
+# loop for mu = 1,2,3,4,5,6
+
+set.seed(1)
+
+mu_values = 0:6
+output = vector("list", 7)
+
+for (i in 1:7) {
+  
+  sims = vector("list", 5000)
+  
+  for (j in 1:5000) {
+    
+    sims[[j]] = sim_t_test(mu = mu_values[i])
+    
+  }
+  
+  output[[i]] = bind_rows(sims) |> 
+  mutate(mu = mu_values[i])
+  
+}
+
+sim_results = bind_rows(output)
+```
 
 
 
