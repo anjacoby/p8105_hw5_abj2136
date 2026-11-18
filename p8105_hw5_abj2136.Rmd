@@ -9,6 +9,7 @@ date: "2026-11-16"
 ### loading libraries
 ```{r message = FALSE}
 library(tidyverse)
+library(patchwork)
 ```
 
 
@@ -66,7 +67,7 @@ over time from week 1 to week 8.
 
 # Problem 3
 
-
+### simulated data sets
 
 ```{r}
 
@@ -110,10 +111,66 @@ sim_results = bind_rows(output)
 ```
 
 
+### plots
 
+```{r}
 
+sim_results |>
+  group_by(mu) |> 
+  summarize(power = mean(p.value < 0.05)) |> 
+  ggplot(aes(x = mu, y = power)) +
+  geom_point() +
+  geom_line()+
+  labs(
+    title = "Power of a one-sample t-test by true mu",
+    x = "True mu",
+    y = "Power"
+  )
+  
 
+```
 
+As the true mean gets further away from the null of 0, power increases, as a larger
+effect size is easier to detect. As power approaches 1, around mu = 4, it plateaus.
+
+```{r}
+
+full_plot = sim_results |> 
+  group_by(mu) |> 
+  summarize(mean_estimate = mean(estimate)) |>
+  ggplot(aes(x = mu, y = mean_estimate)) +
+  geom_point() +
+  geom_line() +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  labs(
+    title = "All samples",
+    x = "True value of mu",
+    y = "Average estimate of mu"
+  )
+
+rejected_plot = sim_results |> 
+  filter(p.value < 0.05) |> 
+  group_by(mu) |> 
+  summarize(mean_estimate = mean(estimate)) |>
+  ggplot(aes(x = mu, y = mean_estimate)) +
+  geom_point() +
+  geom_line() +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed") +
+  labs(
+    title = "Samples where null was rejected",
+    x = "True value of mu",
+    y = "Average estimate of mu"
+  )
+
+full_plot + rejected_plot
+
+```
+
+For smaller effect sizes (mu = 1-3) the average estimate among rejected tests 
+overestimates the true mu because only samples with unusually large estimates 
+will be reach significance. As mu increases, power approaches 1, and the  
+estimates are nearly all rejected so the average converges to the true value of
+mu.
 
 
 
